@@ -27,3 +27,5 @@ pip install uvicorn[standard]
 pip install sqlalchemy
 pip install psycopg2-binary 
 pip install alembic
+pip install passlib
+pip install --upgrade bcrypt

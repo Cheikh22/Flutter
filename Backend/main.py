@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, status, Response, HTTPException
-from sqlalchemy.orm import Session, synonym
+from passlib.hash import bcrypt
+from sqlalchemy.orm import Session
 import schemas
 from database import engine , SessionLocal
 import models
@@ -18,6 +19,7 @@ def get_db():
 
 @app.post("/user", status_code=status.HTTP_201_CREATED)
 def create_user(request: schemas.User,db :Session = Depends(get_db)):
+    request.password= bcrypt.hash(request.password)
     new_user =models.User(name=request.name,email=request.email,password=request.password)
     db.add(new_user)
     db.commit()
@@ -40,12 +42,24 @@ def read_user(id, db :Session = Depends(get_db)):
 
 @app.put("/user/{id}", status_code=status.HTTP_202_ACCEPTED)
 def update_user(id, request: schemas.User,db :Session = Depends(get_db)):
-    db.query(models.User).filter(models.User.id == id).update(request.__dict__)
+    
+    request.password = bcrypt.hash(request.password)
+    user=db.query(models.User).filter(models.User.id == id)
+    if not user.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"User with the id {id} is not available"
+        )
+    user.update(request.__dict__)
     db.commit()
-    return 'done'
+    return 'User updated'
 
 @app.delete("/user/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(id, db :Session = Depends(get_db)):
-    db.query(models.User).filter(models.User.id == id).delete(synchronize_session=False)
+    user=db.query(models.User).filter(models.User.id == id)
+    if not user.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"User with the id {id} is not available"
+        )
+    user.delete(synchronize_session=False)
     db.commit()
     return f"User with id {id} is deleted"

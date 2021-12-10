@@ -1,5 +1,4 @@
 from fastapi import FastAPI, Depends, status, Response, HTTPException
-from passlib.hash import bcrypt
 from sqlalchemy.orm import Session
 import schemas
 from database import engine , SessionLocal
@@ -19,7 +18,6 @@ def get_db():
 
 @app.post("/user", status_code=status.HTTP_201_CREATED)
 def create_user(request: schemas.User,db :Session = Depends(get_db)):
-    request.password= bcrypt.hash(request.password)
     new_user =models.User(name=request.name,email=request.email,password=request.password)
     db.add(new_user)
     db.commit()
@@ -42,8 +40,6 @@ def read_user(id, db :Session = Depends(get_db)):
 
 @app.put("/user/{id}", status_code=status.HTTP_202_ACCEPTED)
 def update_user(id, request: schemas.User,db :Session = Depends(get_db)):
-    
-    request.password = bcrypt.hash(request.password)
     user=db.query(models.User).filter(models.User.id == id)
     if not user.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

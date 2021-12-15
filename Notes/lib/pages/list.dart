@@ -26,7 +26,7 @@ class _MyListState extends State<MyList> {
       color: Colors.grey[200],
       child:Card(
         color: Colors.white,
-        margin: EdgeInsets.fromLTRB(20, 10, 20, 10),
+        margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
         child: FutureBuilder(
           future: _getUsersList(),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -51,6 +51,12 @@ class _MyListState extends State<MyList> {
                             color: darkBlueColor, fontWeight: FontWeight.bold),
                       ),
                     subtitle:Text(snapshot.data[index].email!),
+                    trailing: IconButton(icon: Icon(Icons.delete),onPressed: () async{
+                      String id = snapshot.data[index].id.toString();
+                       http.delete(Uri.parse('http://10.0.2.2:8000/user/'+id));
+                       Navigator.push(context, new MaterialPageRoute(builder: (context) => MyList()));
+
+                    },),
                     ),
                     Divider(height: 5.0),
                   ],
@@ -70,7 +76,6 @@ class _MyListState extends State<MyList> {
     List<User> _users = items.map<User>((json) {
       return User.fromJson(json);
       }).toList();
-      print(_users);
     return _users;
    }
 }

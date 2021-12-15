@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, status, Response, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import schemas
 from database import engine , SessionLocal
@@ -7,6 +8,14 @@ import models
 models.Base.metadata.create_all(engine)
 
 app = FastAPI()
+
+app.add_middleware(
+     CORSMiddleware,
+     allow_origins="*",
+     allow_credentials=True,
+     allow_methods=["*"],
+     allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
@@ -24,7 +33,7 @@ def create_user(request: schemas.User,db :Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
-@app.get("/user", tags=["user"])
+@app.get("/users", tags=["user"])
 def read_user_list(db :Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users

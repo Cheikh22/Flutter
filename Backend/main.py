@@ -24,7 +24,7 @@ def get_db():
     finally:
         db.close()
 
-
+# add user
 @app.post("/user", status_code=status.HTTP_201_CREATED, tags=["user"])
 def create_user(request: schemas.User,db :Session = Depends(get_db)):
     new_user =models.User(name=request.name,email=request.email,password=request.password)
@@ -33,11 +33,13 @@ def create_user(request: schemas.User,db :Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
+# get users
 @app.get("/users", tags=["user"])
 def read_user_list(db :Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
 
+# get user by id
 @app.get("/user/{id}", tags=["user"])
 def read_user(id, db :Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
@@ -47,6 +49,7 @@ def read_user(id, db :Session = Depends(get_db)):
         )
     return user
 
+# update user
 @app.put("/user/{id}", status_code=status.HTTP_202_ACCEPTED, tags=["user"])
 def update_user(id, request: schemas.User,db :Session = Depends(get_db)):
     user=db.query(models.User).filter(models.User.id == id)
@@ -58,6 +61,7 @@ def update_user(id, request: schemas.User,db :Session = Depends(get_db)):
     db.commit()
     return 'User updated'
 
+# delete user
 @app.delete("/user/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["user"])
 def delete_user(id, db :Session = Depends(get_db)):
     user=db.query(models.User).filter(models.User.id == id)
